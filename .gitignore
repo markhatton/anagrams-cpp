@@ -12,6 +12,8 @@
 *.la
 *.a
 
+*.swp
+
 .deps/
 Makefile
 Makefile.in
