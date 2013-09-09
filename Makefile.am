@@ -8,5 +8,5 @@ anagrams_SOURCES = src/anagrams.cpp
 #test_testAnagrams_SOURCES = test/testAnagrams.cpp
 #
 #TESTS_ENVIRONMENT = builddir=$(builddir)
-#TESTS = test/testAnagrams
+TESTS = test/testAnagrams.sh
 	    

@@ -3,8 +3,12 @@
  */
 
 #include <iostream>
+#include <set>
 
 using namespace std;
+
+set<string> dict;
+void solve(const string w, const string remain, const string acc);
 
 void usage(string message = "")
 {
@@ -56,5 +60,30 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    cout << input << endl;
+    dict.insert("a");
+    dict.insert("b");
+    dict.insert("c");
+    dict.insert("ab");
+    dict.insert("bc");
+
+    solve("", input, "");
+}
+
+void solve(const string w, const string remain, const string acc)
+{
+    for (unsigned i=0; i < remain.length(); ++i)
+    {
+        char c = remain.at(i);
+        string w_ = w + c;
+        string remain_ = remain.substr(0, i) + remain.substr(i + 1, remain.length() - i - 1);
+
+        if (dict.count(w_) > 0) {
+            if (remain_.empty())
+                cout << acc + w_ << endl;
+            else
+                solve("", remain_, acc + w_ + " ");
+        }
+
+        solve(w_, remain_, acc);
+    }
 }
