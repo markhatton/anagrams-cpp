@@ -27,7 +27,13 @@ int main(int argc, char* argv[])
     for (int i = 1; i < argc; i++)
     {
         string arg = argv[i];
-        if (!no_more_opts && arg == "-u")
+        if (no_more_opts) {
+            input += arg;
+        }
+        else if (arg == "--") {
+            no_more_opts = true;
+        }
+        else if (arg == "-u")
         {
             if (i + 1 >= argc)
             {
@@ -36,11 +42,8 @@ int main(int argc, char* argv[])
             }
             unigramsfile = argv[++i];
         }
-        else if (arg == "--") {
-            no_more_opts = true;
-        }
         else if (!arg.empty()) {
-            if (!no_more_opts && *arg.begin() == '-') {
+            if (*arg.begin() == '-') {
                 usage("unexpected option -- " + arg);
                 return 1;
             }
