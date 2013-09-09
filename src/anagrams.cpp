@@ -22,22 +22,36 @@ int main(int argc, char* argv[])
     string input = "";
     string unigramsfile = "./unigrams";
 
+    bool no_more_opts = false;
+
     for (int i = 1; i < argc; i++)
     {
-        if (string(argv[i]) == "-u")
+        string arg = argv[i];
+        if (!no_more_opts && arg == "-u")
         {
             if (i + 1 >= argc)
             {
-                usage("missing filename for option -- " + string(argv[i]));
+                usage("missing filename for option -- " + arg);
                 return 1;
             }
             unigramsfile = argv[++i];
         }
-        else
-        {
-            input += argv[i];
+        else if (arg == "--") {
+            no_more_opts = true;
+        }
+        else if (!arg.empty()) {
+            if (!no_more_opts && *arg.begin() == '-') {
+                usage("unexpected option -- " + arg);
+                return 1;
+            }
+            input += arg; 
         }
     }
 
-    cout << input;
+    if (input.empty()) {
+        usage();
+        return 1;
+    }
+
+    cout << input << endl;
 }
