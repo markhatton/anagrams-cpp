@@ -3,7 +3,11 @@
  */
 
 #include <iostream>
+#include <sstream>
 #include <set>
+#include <list>
+#include <algorithm>
+#include <iterator>
 
 using namespace std;
 
@@ -69,6 +73,23 @@ int main(int argc, char* argv[])
     solve("", input, "");
 }
 
+set<string> partials;
+
+string buildPartial(string s)
+{
+    list<string> sorted;
+    istringstream iss(s);
+    copy(istream_iterator<string>(iss),
+        istream_iterator<string>(),
+        back_inserter<list<string> >(sorted));
+    sorted.sort();
+
+    stringstream ss;
+    for (list<string>::iterator it=sorted.begin(); it!=sorted.end(); ++it)
+        ss << *it << " ";
+    return ss.str();
+}
+
 void solve(const string w, const string remain, const string acc)
 {
     for (unsigned i=0; i < remain.length(); ++i)
@@ -78,10 +99,15 @@ void solve(const string w, const string remain, const string acc)
         string remain_ = remain.substr(0, i) + remain.substr(i + 1, remain.length() - i - 1);
 
         if (dict.count(w_) > 0) {
-            if (remain_.empty())
-                cout << acc + w_ << endl;
-            else
-                solve("", remain_, acc + w_ + " ");
+            string p = buildPartial(acc + w_);
+            if (partials.count(p) == 0)
+            {
+                partials.insert(p);
+                if (remain_.empty())
+                    cout << acc + w_ << endl;
+                else
+                    solve("", remain_, p);
+            }
         }
 
         solve(w_, remain_, acc);

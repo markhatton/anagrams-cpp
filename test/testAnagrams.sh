@@ -9,14 +9,7 @@ function fail() {
 
 expected='a b c
 a bc
-a c b
-ab c
-b a c
-b c a
-bc a
-c a b
-c ab
-c b a'
+ab c'
 solutions=$(./anagrams abc -u <(printf 'a\t1\nb\t1\nc\t1\nab\t1\nbc\t1\n'))
 [[ "$solutions" == "$expected" ]] || fail "[$solutions] != [$expected]"
 
