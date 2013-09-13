@@ -135,12 +135,12 @@ inline void solve(const string &w, const string &remain, const list<string> &acc
         lastc = c;
 
         string w_ = w + c;
-        string remain_ = remain.substr(0, i) + remain.substr(i + 1, remain.length() - i - 1);
-
         TRIE_T::iterator it = dict.find(w_);
 
         if (it != dict.end())
         {
+            string remain_ = remain.substr(0, i) + remain.substr(i + 1, remain.length() - i - 1);
+
             if (it.hasValue()) {
                 // we have found a whole word (not just a prefix)
                 list<string> partial = insertionSort(acc, w_);
