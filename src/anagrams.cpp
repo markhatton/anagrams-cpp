@@ -12,18 +12,18 @@
 using namespace std;
 
 
-inline void solve(const string w, const string remain, const list<string> acc);
+inline void solve(const string &w, const string &remain, const list<string> &acc);
 
 string sortChars(const string s);
 
-inline list<string> insertionSort(const list<string> xs, const string x);
+inline list<string> insertionSort(const list<string> &xs, const string &x);
 
-inline string makeString(list<string> xs);
+inline string makeString(list<string> &xs);
 
 set<string> partials;
 
 
-void usage(string message = "")
+void usage(const string &message = "")
 {
     if (!message.empty())
         cout << message << endl;
@@ -93,7 +93,7 @@ string sortChars(string s)
     return ss.str();
 }
 
-inline list<string> insertionSort(const list<string> xs, const string x)
+inline list<string> insertionSort(const list<string> &xs, const string &x)
 {
     list<string> sorted = xs;
     for (list<string>::iterator it=sorted.begin(); it!=sorted.end(); ++it)
@@ -109,7 +109,7 @@ inline list<string> insertionSort(const list<string> xs, const string x)
     return sorted;
 }
 
-inline string makeString(list<string> xs)
+inline string makeString(list<string> &xs)
 {
     stringstream ss;
     for (list<string>::iterator it=xs.begin(); it!=xs.end(); ++it)
@@ -120,7 +120,7 @@ inline string makeString(list<string> xs)
     return ss.str();
 }
 
-inline void solve(const string w, const string remain, const list<string> acc)
+inline void solve(const string &w, const string &remain, const list<string> &acc)
 {
     char lastc = '\0';
     for (unsigned i=0; i < remain.length(); ++i)
