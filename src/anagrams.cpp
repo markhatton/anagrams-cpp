@@ -14,7 +14,7 @@ using namespace std;
 
 inline void solve(const string &w, const string &remain, const list<string> &acc);
 
-string sortChars(const string s);
+string sortAndFilterChars(const string s);
 
 inline list<string> insertionSort(const list<string> &xs, const string &x);
 
@@ -75,14 +75,18 @@ int main(int argc, char* argv[])
 
     loadDictionary(unigramsfile);
 
-    solve("", sortChars(input), list<string>());
+    solve("", sortAndFilterChars(input), list<string>());
 }
 
-string sortChars(string s)
+string sortAndFilterChars(string s)
 {
     list<char> cs;
     for ( string::iterator it=s.begin(); it!=s.end(); ++it)
-        cs.push_back(*it);
+    {
+        char c = tolower(*it);
+        if (c >= 'a' && c <= 'z')
+            cs.push_back(c);
+    }
 
     cs.sort();
 
