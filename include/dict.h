@@ -5,6 +5,7 @@
 #ifndef DICT_H_
 #define DICT_H_
 
+#include "trie_map.h"
 
 #include <iostream>
 #include <fstream>
@@ -14,7 +15,9 @@
 
 using namespace std;
 
-set<string> dict;
+typedef trie_map<string, long, 32> TRIE_T;
+
+TRIE_T dict;
 
 void loadDictionary(const string &unigramsFile)
 {
@@ -30,7 +33,10 @@ void loadDictionary(const string &unigramsFile)
         stringstream ss(line);
         getline(ss, word, '\t');
 
-        dict.insert(word);
+        if (word.length() > 0) {
+            // cout << "adding " << word << " to dict, with len " << word.length() << endl;
+            dict[word] = 1;
+        }
     }
 
     infile.close();

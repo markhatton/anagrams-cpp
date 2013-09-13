@@ -113,20 +113,26 @@ inline void solve(const string w, const string remain, const list<string> acc)
         string w_ = w + c;
         string remain_ = remain.substr(0, i) + remain.substr(i + 1, remain.length() - i - 1);
 
-        if (dict.count(w_) > 0)
+        TRIE_T::iterator it = dict.find(w_);
+
+        if (it != dict.end())
         {
-            list<string> partial = insertionSort(acc, w_);
-            string p = makeString(partial);
-            if (partials.count(p) == 0)
-            {
-                partials.insert(p);
-                if (remain_.empty())
-                    cout << p << endl;
-                else
-                    solve("", remain_, partial);
+            if (it.hasValue()) {
+                // we have found a whole word (not just a prefix)
+                list<string> partial = insertionSort(acc, w_);
+                string p = makeString(partial);
+                if (partials.count(p) == 0)
+                {
+                    partials.insert(p);
+                    if (remain_.empty())
+                        cout << p << endl;
+                    else
+                        solve("", remain_, partial);
+                }
             }
+
+            solve(w_, remain_, acc);
         }
 
-        solve(w_, remain_, acc);
     }
 }
