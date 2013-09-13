@@ -2,6 +2,8 @@
  * anagrams.cpp
  */
 
+#include "../include/dict.h"
+
 #include <iostream>
 #include <sstream>
 #include <set>
@@ -11,8 +13,6 @@
 
 using namespace std;
 
-
-set<string> dict;
 
 void solve(const string w, const string remain, const list<string> acc);
 
@@ -71,11 +71,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    dict.insert("a");
-    dict.insert("b");
-    dict.insert("c");
-    dict.insert("ab");
-    dict.insert("bc");
+    loadDictionary(unigramsfile);
 
     solve("", input, list<string>());
 }
