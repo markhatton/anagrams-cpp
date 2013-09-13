@@ -16,9 +16,13 @@ using namespace std;
 
 inline void solve(const string w, const string remain, const list<string> acc);
 
+string sortChars(const string s);
+
 inline list<string> insertionSort(const list<string> xs, const string x);
 
 inline string makeString(list<string> xs);
+
+set<string> partials;
 
 
 void usage(string message = "")
@@ -73,10 +77,23 @@ int main(int argc, char* argv[])
 
     loadDictionary(unigramsfile);
 
-    solve("", input, list<string>());
+    solve("", sortChars(input), list<string>());
 }
 
-set<string> partials;
+string sortChars(string s)
+{
+    list<char> cs;
+    for ( string::iterator it=s.begin(); it!=s.end(); ++it)
+        cs.push_back(*it);
+
+    cs.sort();
+
+    stringstream ss;
+    for ( list<char>::iterator it=cs.begin(); it!=cs.end(); ++it)
+        ss << *it;
+
+    return ss.str();
+}
 
 inline list<string> insertionSort(const list<string> xs, const string x)
 {
@@ -107,9 +124,14 @@ inline string makeString(list<string> xs)
 
 inline void solve(const string w, const string remain, const list<string> acc)
 {
+    char lastc = '\0';
     for (unsigned i=0; i < remain.length(); ++i)
     {
         char c = remain.at(i);
+        if (c == lastc)
+            continue;
+        lastc = c;
+
         string w_ = w + c;
         string remain_ = remain.substr(0, i) + remain.substr(i + 1, remain.length() - i - 1);
 
