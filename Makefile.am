@@ -1,3 +1,5 @@
+CXXFLAGS = -O3
+
 bin_PROGRAMS = \
 	anagrams
 

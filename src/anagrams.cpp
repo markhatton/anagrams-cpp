@@ -14,7 +14,7 @@
 using namespace std;
 
 
-void solve(const string w, const string remain, const list<string> acc);
+inline void solve(const string w, const string remain, const list<string> acc);
 
 inline list<string> insertionSort(const list<string> xs, const string x);
 
@@ -105,7 +105,7 @@ inline string makeString(list<string> xs)
     return ss.str();
 }
 
-void solve(const string w, const string remain, const list<string> acc)
+inline void solve(const string w, const string remain, const list<string> acc)
 {
     for (unsigned i=0; i < remain.length(); ++i)
     {
