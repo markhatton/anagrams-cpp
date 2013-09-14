@@ -8,11 +8,12 @@
 #include <sstream>
 #include <set>
 #include <list>
+#include <queue>
 
 using namespace std;
 
 
-inline void solve(trie_t* const t, const string &remain, const list<string> &acc);
+inline void solve();
 
 string sortAndFilterChars(const string s);
 
@@ -20,7 +21,28 @@ inline list<string> insertionSort(const list<string> &xs, const string &x);
 
 inline string makeString(list<string> &xs);
 
-set<string> partials;
+struct frontier_element {
+    long priority;
+    trie_t* t;
+    set<string>::iterator remain;
+    set<list<string> >::iterator acc;
+
+    inline frontier_element(long _priority, trie_t* _t, set<string>::iterator _remain, set<list<string> >::iterator _acc):
+        priority(_priority),
+        t(_t),
+        remain(_remain),
+        acc(_acc){}
+};
+
+struct frontier_element_comparator : binary_function <frontier_element,frontier_element,bool> {
+  inline bool operator() (const frontier_element& a, const frontier_element& b) const {return a.priority<b.priority;}
+};
+
+priority_queue<frontier_element, vector<frontier_element>, frontier_element_comparator> frontier;
+
+set<list<string> > partials;
+
+set<string> remains;
 
 
 void usage(const string &message = "")
@@ -75,7 +97,12 @@ int main(int argc, char* argv[])
 
     loadDictionary(unigramsfile);
 
-    solve(&dict, sortAndFilterChars(input), list<string>());
+    string sortedInput = sortAndFilterChars(input);
+    pair<set<list<string> >::iterator, bool> inserted = partials.insert(list<string>());
+    pair<set<string>::iterator, bool> rinserted = remains.insert(sortedInput);
+    frontier.push(frontier_element(0L, &dict, rinserted.first, inserted.first));
+
+    solve();
 }
 
 string sortAndFilterChars(string s)
@@ -124,39 +151,51 @@ inline string makeString(list<string> &xs)
     return ss.str();
 }
 
-inline void solve(trie_t* const t, const string &remain, const list<string> &acc)
+inline void solve()
 {
-    char lastc = '\0';
-    for (unsigned i=0; i < remain.length(); ++i)
-    {
-        char c = remain.at(i);
-        if (c == lastc)
-            continue;
-        lastc = c;
+    while (true) {
 
-        trie_t* t_ = t->getChild(c);
+        if (frontier.empty())
+            break;
 
-        if (t_)
+        frontier_element f = frontier.top();
+        frontier.pop();
+        string remain = *(f.remain);
+    
+        char lastc = '\0';
+        for (unsigned i=0; i < remain.length(); ++i)
         {
-            string remain_ = remain.substr(0, i) + remain.substr(i + 1, remain.length() - i - 1);
-
-            pair<const string, long>* kv = t_->getValue();
-            if (kv) {
-                // we have found a whole word (not just a prefix)
-                list<string> partial = insertionSort(acc, kv->first);
-                string p = makeString(partial);
-                if (partials.count(p) == 0)
-                {
-                    partials.insert(p);
-                    if (remain_.empty())
-                        cout << p << endl;
-                    else
-                        solve(&dict, remain_, partial);
+            char c = remain.at(i);
+            if (c == lastc)
+                continue;
+            lastc = c;
+    
+            trie_t* t_ = f.t->getChild(c);
+    
+            if (t_)
+            {
+                string remain_ = remain.substr(0, i) + remain.substr(i + 1, remain.length() - i - 1);
+                pair<set<string>::iterator, bool> rinserted = remains.insert(remain_);
+    
+                pair<const string, long>* kv = t_->getValue();
+                if (kv) {
+                    // we have found a whole word (not just a prefix)
+                    list<string> partial = insertionSort(*(f.acc), kv->first);
+                    if (partials.count(partial) == 0)
+                    {
+                        pair<set<list<string> >::iterator, bool> inserted = partials.insert(partial);
+                        if (remain_.empty()) {
+                            string p = makeString(partial);
+                            cout << p << endl;
+                        } else {
+                            frontier.push(frontier_element(kv->second, &dict, rinserted.first, inserted.first));
+                        }
+                    }
                 }
+    
+                frontier.push(frontier_element(f.priority, t_, rinserted.first, f.acc));
             }
-
-            solve(t_, remain_, acc);
+    
         }
-
     }
 }
