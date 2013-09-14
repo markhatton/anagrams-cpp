@@ -24,10 +24,10 @@ inline string makeString(list<string> &xs);
 struct frontier_element {
     long priority;
     trie_t* t;
-    set<string>::iterator remain;
-    set<list<string> >::iterator acc;
+    const string* remain;
+    const list<string>* acc;
 
-    inline frontier_element(long _priority, trie_t* _t, set<string>::iterator _remain, set<list<string> >::iterator _acc):
+    inline frontier_element(long _priority, trie_t* _t, const string* _remain, const list<string>* _acc):
         priority(_priority),
         t(_t),
         remain(_remain),
@@ -98,9 +98,9 @@ int main(int argc, char* argv[])
     loadDictionary(unigramsfile);
 
     string sortedInput = sortAndFilterChars(input);
-    pair<set<list<string> >::iterator, bool> inserted = partials.insert(list<string>());
-    pair<set<string>::iterator, bool> rinserted = remains.insert(sortedInput);
-    frontier.push(frontier_element(0L, &dict, rinserted.first, inserted.first));
+    pair<set<list<string> >::iterator, bool> partial = partials.insert(list<string>());
+    pair<set<string>::iterator, bool> remain = remains.insert(sortedInput);
+    frontier.emplace(0L, &dict, &*remain.first, &*partial.first);
 
     solve();
 }
@@ -174,26 +174,29 @@ inline void solve()
     
             if (t_)
             {
-                string remain_ = remain.substr(0, i) + remain.substr(i + 1, remain.length() - i - 1);
-                pair<set<string>::iterator, bool> rinserted = remains.insert(remain_);
+                pair<set<string>::iterator, bool> remain_ =
+                    remains.emplace(remain.substr(0, i) + remain.substr(i + 1, remain.length() - i - 1));
     
                 pair<const string, long>* kv = t_->getValue();
                 if (kv) {
                     // we have found a whole word (not just a prefix)
-                    list<string> partial = insertionSort(*(f.acc), kv->first);
-                    if (partials.count(partial) == 0)
+
+                    pair<set<list<string> >::iterator, bool> partial =
+                        partials.emplace(insertionSort(*(f.acc), kv->first));
+
+                    if (partial.second)
                     {
-                        pair<set<list<string> >::iterator, bool> inserted = partials.insert(partial);
-                        if (remain_.empty()) {
-                            string p = makeString(partial);
+                        if ((*remain_.first).empty()) {
+                            list<string> solution = *partial.first;
+                            string p = makeString(solution);
                             cout << p << endl;
                         } else {
-                            frontier.push(frontier_element(kv->second, &dict, rinserted.first, inserted.first));
+                            frontier.emplace(kv->second, &dict, &*remain_.first, &*partial.first);
                         }
                     }
                 }
     
-                frontier.push(frontier_element(f.priority, t_, rinserted.first, f.acc));
+                frontier.emplace(f.priority, t_, &*remain_.first, f.acc);
             }
     
         }

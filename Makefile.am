@@ -1,4 +1,6 @@
-CXXFLAGS = -O3
+CXX = clang++
+CXXFLAGS = -std=c++0x -stdlib=libc++ -O3
+#CXXFLAGS = -O3
 
 bin_PROGRAMS = \
 	anagrams
