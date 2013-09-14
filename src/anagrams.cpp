@@ -135,7 +135,7 @@ inline void solve(const string &w, const string &remain, const list<string> &acc
         lastc = c;
 
         string w_ = w + c;
-        TRIE_T::iterator it = dict.find(w_);
+        trie_t::iterator it = dict.find(w_);
 
         if (it != dict.end())
         {

@@ -15,9 +15,9 @@
 
 using namespace std;
 
-typedef trie_map<string, long, 32> TRIE_T;
+typedef trie_map<string, long, 32> trie_t;
 
-TRIE_T dict;
+trie_t dict;
 
 void loadDictionary(const string &unigramsFile)
 {
