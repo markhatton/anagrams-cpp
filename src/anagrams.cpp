@@ -191,7 +191,9 @@ inline void solve()
                             string p = makeString(solution);
                             cout << p << endl;
                         } else {
-                            frontier.emplace(kv->second, &dict, &*remain_.first, &*partial.first);
+                            long priority = -((*partial.first).size() << 26) + kv->second;
+                            if (f.priority < priority) priority = f.priority;
+                            frontier.emplace(priority, &dict, &*remain_.first, &*partial.first);
                         }
                     }
                 }
