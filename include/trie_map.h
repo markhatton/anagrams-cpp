@@ -477,6 +477,17 @@ public:
     return i->second;
   }
 
+  inline trie_map_type * getChild(char &c)
+  {
+    trie_map_type * t = this;
+    size_t c_ = static_cast<size_t>(c) & key_element_range_mask;
+    return t->table[ c_ ];
+  }
+
+  inline value_type * getValue() const
+  {
+    return value;
+  }
 
   inline iterator find( const key_type &k )
   {

@@ -12,7 +12,7 @@
 using namespace std;
 
 
-inline void solve(const string &w, const string &remain, const list<string> &acc);
+inline void solve(trie_t* const t, const string &remain, const list<string> &acc);
 
 string sortAndFilterChars(const string s);
 
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
 
     loadDictionary(unigramsfile);
 
-    solve("", sortAndFilterChars(input), list<string>());
+    solve(&dict, sortAndFilterChars(input), list<string>());
 }
 
 string sortAndFilterChars(string s)
@@ -124,7 +124,7 @@ inline string makeString(list<string> &xs)
     return ss.str();
 }
 
-inline void solve(const string &w, const string &remain, const list<string> &acc)
+inline void solve(trie_t* const t, const string &remain, const list<string> &acc)
 {
     char lastc = '\0';
     for (unsigned i=0; i < remain.length(); ++i)
@@ -134,16 +134,16 @@ inline void solve(const string &w, const string &remain, const list<string> &acc
             continue;
         lastc = c;
 
-        string w_ = w + c;
-        trie_t::iterator it = dict.find(w_);
+        trie_t* t_ = t->getChild(c);
 
-        if (it != dict.end())
+        if (t_)
         {
             string remain_ = remain.substr(0, i) + remain.substr(i + 1, remain.length() - i - 1);
 
-            if (it.hasValue()) {
+            pair<const string, long>* kv = t_->getValue();
+            if (kv) {
                 // we have found a whole word (not just a prefix)
-                list<string> partial = insertionSort(acc, w_);
+                list<string> partial = insertionSort(acc, kv->first);
                 string p = makeString(partial);
                 if (partials.count(p) == 0)
                 {
@@ -151,11 +151,11 @@ inline void solve(const string &w, const string &remain, const list<string> &acc
                     if (remain_.empty())
                         cout << p << endl;
                     else
-                        solve("", remain_, partial);
+                        solve(&dict, remain_, partial);
                 }
             }
 
-            solve(w_, remain_, acc);
+            solve(t_, remain_, acc);
         }
 
     }
