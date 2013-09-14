@@ -42,8 +42,6 @@ priority_queue<frontier_element, vector<frontier_element>, frontier_element_comp
 
 set<list<string> > partials;
 
-set<string> remains;
-
 
 void usage(const string &message = "")
 {
@@ -99,8 +97,7 @@ int main(int argc, char* argv[])
 
     string sortedInput = sortAndFilterChars(input);
     pair<set<list<string> >::iterator, bool> partial = partials.insert(list<string>());
-    pair<set<string>::iterator, bool> remain = remains.insert(sortedInput);
-    frontier.emplace(0L, &dict, &*remain.first, &*partial.first);
+    frontier.emplace(0L, &dict, &sortedInput, &*partial.first);
 
     solve();
 }
@@ -174,31 +171,30 @@ inline void solve()
     
             if (t_)
             {
-                pair<set<string>::iterator, bool> remain_ =
-                    remains.emplace(remain.substr(0, i) + remain.substr(i + 1, remain.length() - i - 1));
+                const string* remain_= new string(remain.substr(0, i) + remain.substr(i + 1, remain.length() - i - 1));
     
                 pair<const string, long>* kv = t_->getValue();
                 if (kv) {
                     // we have found a whole word (not just a prefix)
 
                     pair<set<list<string> >::iterator, bool> partial =
-                        partials.emplace(insertionSort(*(f.acc), kv->first));
+                        partials.emplace(insertionSort(*f.acc, kv->first));
 
                     if (partial.second)
                     {
-                        if ((*remain_.first).empty()) {
+                        if (remain_->empty()) {
                             list<string> solution = *partial.first;
                             string p = makeString(solution);
                             cout << p << endl;
                         } else {
-                            long priority = -((*partial.first).size() << 26) + kv->second;
+                            long priority = -(partial.first->size() << 26) + kv->second;
                             if (f.priority < priority) priority = f.priority;
-                            frontier.emplace(priority, &dict, &*remain_.first, &*partial.first);
+                            frontier.emplace(priority, &dict, remain_, &*partial.first);
                         }
                     }
                 }
     
-                frontier.emplace(f.priority, t_, &*remain_.first, f.acc);
+                frontier.emplace(f.priority, t_, remain_, f.acc);
             }
     
         }
