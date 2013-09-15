@@ -9,6 +9,8 @@
 #include <set>
 #include <list>
 #include <queue>
+#include <vector>
+#include <memory>
 
 using namespace std;
 
@@ -19,28 +21,33 @@ string sortAndFilterChars(const string s);
 
 inline list<string> insertionSort(const list<string> &xs, const string &x);
 
-inline string makeString(list<string> &xs);
+inline string makeString(const list<string> &xs);
 
 struct frontier_element {
     long priority;
-    trie_t* t;
-    const string* remain;
+    const trie_t* t;
+    long char_mask;
     const list<string>* acc;
 
-    inline frontier_element(long _priority, trie_t* _t, const string* _remain, const list<string>* _acc):
+    frontier_element(long _priority, const trie_t* _t, long _char_mask, const list<string>* _acc):
         priority(_priority),
         t(_t),
-        remain(_remain),
-        acc(_acc){}
+        char_mask(_char_mask),
+        acc(_acc)
+        {}
 };
 
 struct frontier_element_comparator : binary_function <frontier_element,frontier_element,bool> {
   inline bool operator() (const frontier_element& a, const frontier_element& b) const {return a.priority<b.priority;}
 };
 
+string chars;
+
+long complete;
+
 priority_queue<frontier_element, vector<frontier_element>, frontier_element_comparator> frontier;
 
-set<list<string> > partials;
+set<list<string> > visited;
 
 
 void usage(const string &message = "")
@@ -88,16 +95,23 @@ int main(int argc, char* argv[])
         }
     }
 
-    if (input.empty()) {
+    chars = sortAndFilterChars(input);
+    complete = LONG_MAX >> (sizeof(complete) * 8 - chars.length() - 1);
+
+    if (chars.empty()) {
         usage();
+        return 1;
+    }
+    else if (chars.length() > 64)
+    {
+        usage("input longer than 64 characters is not supported");
         return 1;
     }
 
     loadDictionary(unigramsfile);
 
-    string sortedInput = sortAndFilterChars(input);
-    pair<set<list<string> >::iterator, bool> partial = partials.insert(list<string>());
-    frontier.emplace(0L, &dict, &sortedInput, &*partial.first);
+    const pair<set<list<string> >::iterator, bool>& solution = visited.insert(list<string>());
+    frontier.emplace(1 << 26, &dict, 0L, &*solution.first);
 
     solve();
 }
@@ -137,11 +151,11 @@ inline list<string> insertionSort(const list<string> &xs, const string &x)
     return sorted;
 }
 
-inline string makeString(list<string> &xs)
+inline string makeString(const list<string> &xs)
 {
     stringstream ss;
-    for (list<string>::iterator it=xs.begin(); it!=xs.end(); ++it)
-        if (it == xs.begin())
+    for (list<string>::const_iterator it=xs.cbegin(); it!=xs.cend(); ++it)
+        if (it == xs.cbegin())
             ss << *it;
         else
             ss << ' ' << *it;
@@ -155,46 +169,46 @@ inline void solve()
         if (frontier.empty())
             break;
 
-        frontier_element f = frontier.top();
+        const frontier_element f = frontier.top();
         frontier.pop();
-        string remain = *(f.remain);
     
         char lastc = '\0';
-        for (unsigned i=0; i < remain.length(); ++i)
+        for (unsigned i=0; i < chars.length(); ++i)
         {
-            char c = remain.at(i);
-            if (c == lastc)
+            char c = chars.at(i);
+            if (f.char_mask & (1 << i) || c == lastc)
                 continue;
             lastc = c;
+
+            const trie_t* t = f.t->getChild(c);
     
-            trie_t* t_ = f.t->getChild(c);
-    
-            if (t_)
+            if (t)
             {
-                const string* remain_= new string(remain.substr(0, i) + remain.substr(i + 1, remain.length() - i - 1));
+                long char_mask(f.char_mask);
+                char_mask |= (1 << i);
     
-                pair<const string, long>* kv = t_->getValue();
+                pair<const string, long>* kv = t->getValue();
                 if (kv) {
+
                     // we have found a whole word (not just a prefix)
 
-                    pair<set<list<string> >::iterator, bool> partial =
-                        partials.emplace(insertionSort(*f.acc, kv->first));
+                    const pair<set<list<string> >::iterator, bool>& solution =
+                        visited.emplace(insertionSort(*f.acc, kv->first));
 
-                    if (partial.second)
+                    if (solution.second)
                     {
-                        if (remain_->empty()) {
-                            list<string> solution = *partial.first;
-                            string p = makeString(solution);
+                        if ((char_mask & complete) == complete) {
+                            const string p = makeString(*solution.first);
                             cout << p << endl;
                         } else {
-                            long priority = -(partial.first->size() << 26) + kv->second;
+                            long priority = -(solution.first->size() << 26) + kv->second;
                             if (f.priority < priority) priority = f.priority;
-                            frontier.emplace(priority, &dict, remain_, &*partial.first);
+                            frontier.emplace(priority, &dict, char_mask, &*solution.first);
                         }
                     }
                 }
     
-                frontier.emplace(f.priority, t_, remain_, f.acc);
+                frontier.emplace(f.priority, t, char_mask, f.acc);
             }
     
         }
