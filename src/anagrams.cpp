@@ -15,7 +15,7 @@
 using namespace std;
 
 
-inline void solve();
+void solve();
 
 string sortAndFilterChars(const string s);
 
@@ -162,7 +162,7 @@ inline string makeString(const list<string> &xs)
     return ss.str();
 }
 
-inline void solve()
+void solve()
 {
     while (true) {
 
@@ -190,16 +190,17 @@ inline void solve()
                 pair<const string, long>* kv = t->getValue();
                 bool eof = (char_mask & complete) == complete;
 
-                if (kv) {
-
-                    // we have found a whole word (not just a prefix)
+                if (kv)
+                {
+                    // we have found a dictionary word (not just a prefix)
 
                     const pair<set<list<string> >::iterator, bool>& solution =
                         visited.emplace(insertionSort(*f.acc, kv->first));
 
                     if (solution.second)
                     {
-                        if (eof) {
+                        if (eof)
+                        {
                             const string p = makeString(*solution.first);
                             cout << p << endl;
                         } else {
