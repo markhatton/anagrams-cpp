@@ -10,7 +10,7 @@
 #include <list>
 #include <queue>
 #include <vector>
-#include <memory>
+#include <climits>
 
 using namespace std;
 
@@ -53,7 +53,7 @@ set<list<string> > visited;
 void usage(const string &message = "")
 {
     if (!message.empty())
-        cout << message << endl;
+        cerr << message << endl;
 
     cout
             << "Usage: anagrams INPUT...\n"
