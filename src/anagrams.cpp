@@ -188,6 +188,8 @@ inline void solve()
                 char_mask |= (1 << i);
     
                 pair<const string, long>* kv = t->getValue();
+                bool eof = (char_mask & complete) == complete;
+
                 if (kv) {
 
                     // we have found a whole word (not just a prefix)
@@ -197,7 +199,7 @@ inline void solve()
 
                     if (solution.second)
                     {
-                        if ((char_mask & complete) == complete) {
+                        if (eof) {
                             const string p = makeString(*solution.first);
                             cout << p << endl;
                         } else {
@@ -208,7 +210,8 @@ inline void solve()
                     }
                 }
     
-                frontier.emplace(f.priority, t, char_mask, f.acc);
+                if (!eof)
+                    frontier.emplace(f.priority, t, char_mask, f.acc);
             }
     
         }
