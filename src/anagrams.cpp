@@ -5,6 +5,7 @@
 #include "../include/dict.h"
 
 #include <iostream>
+#include <chrono>
 #include <sstream>
 #include <set>
 #include <list>
@@ -15,7 +16,7 @@
 using namespace std;
 
 
-void solve();
+void solve(int solutionLimit, unsigned long timeoutAtMillis);
 
 string sortAndFilterChars(const string s);
 
@@ -58,13 +59,17 @@ void usage(const string &message = "")
     cout
             << "Usage: anagrams INPUT...\n"
                 "Options:\n"
-                "  -u file                    unigrams CSV file to use as dictionary (defaults to ./unigrams)\n";
+                "  -u file                    unigrams CSV file to use as dictionary, defaults to ./unigrams\n"
+                "  -l n                       limit number of solutions to n, defaults to unlimited (0)\n"
+                "  -t seconds                 timeout execution afer seconds, defaults to no timeout (0)\n";
 }
 
 int main(int argc, char* argv[])
 {
     string input = "";
     string unigramsfile = "./unigrams";
+    unsigned long solutionsLimit = ULONG_MAX;
+    int timeoutSeconds = 0;
 
     bool no_more_opts = false;
 
@@ -86,8 +91,26 @@ int main(int argc, char* argv[])
             }
             unigramsfile = argv[++i];
         }
+        else if (arg == "-l")
+        {
+            if (i + 1 >= argc)
+            {
+                usage("missing value for option -- " + arg);
+                return 1;
+            }
+            solutionsLimit = atoi(argv[++i]);
+        }
+        else if (arg == "-t")
+        {
+            if (i + 1 >= argc)
+            {
+                usage("missing value for option -- " + arg);
+                return 1;
+            }
+            timeoutSeconds = atoi(argv[++i]);
+        }
         else if (!arg.empty()) {
-            if (*arg.begin() == '-') {
+            if (arg.at(0) == '-') {
                 usage("unexpected option -- " + arg);
                 return 1;
             }
@@ -113,7 +136,14 @@ int main(int argc, char* argv[])
     const pair<set<list<string> >::iterator, bool>& solution = visited.insert(list<string>());
     frontier.emplace(1 << 26, &dict, 0L, &*solution.first);
 
-    solve();
+    unsigned long timeoutAtMillis = ULONG_MAX;
+    if (timeoutSeconds)
+    {
+        unsigned long now = chrono::system_clock::now().time_since_epoch() / chrono::milliseconds(1);
+        timeoutAtMillis = now + timeoutSeconds * 1000;
+    }
+
+    solve(solutionsLimit, timeoutAtMillis);
 }
 
 string sortAndFilterChars(string s)
@@ -162,11 +192,13 @@ inline string makeString(const list<string> &xs)
     return ss.str();
 }
 
-void solve()
+void solve(int solutionLimit, unsigned long timeoutAtMillis)
 {
+    unsigned long solutions = 0;
+
     while (true) {
 
-        if (frontier.empty())
+        if (frontier.empty() || chrono::system_clock::now().time_since_epoch() / chrono::milliseconds(1) > timeoutAtMillis)
             break;
 
         const frontier_element f = frontier.top();
@@ -203,6 +235,9 @@ void solve()
                         {
                             const string p = makeString(*solution.first);
                             cout << p << endl;
+                            solutions++;
+                            if (solutions >= solutionLimit)
+                                return;
                         } else {
                             long priority = -(solution.first->size() << 26) + kv->second;
                             if (f.priority < priority) priority = f.priority;
