@@ -219,9 +219,11 @@ void solve(int solutionLimit, unsigned long timeoutAtMillis)
                 long char_mask(f.char_mask);
                 char_mask |= (1 << i);
     
-                pair<const string, long>* kv = t->getValue();
                 bool eof = (char_mask & complete) == complete;
+                if (!eof)
+                    frontier.emplace(f.priority, t, char_mask, f.acc);
 
+                pair<const string, long>* kv = t->getValue();
                 if (kv)
                 {
                     // we have found a dictionary word (not just a prefix)
@@ -245,9 +247,6 @@ void solve(int solutionLimit, unsigned long timeoutAtMillis)
                         }
                     }
                 }
-    
-                if (!eof)
-                    frontier.emplace(f.priority, t, char_mask, f.acc);
             }
     
         }
