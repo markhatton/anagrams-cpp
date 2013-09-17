@@ -20,17 +20,15 @@ void solve(int solutionLimit, unsigned long timeoutAtMillis);
 
 string sortAndFilterChars(const string s);
 
-inline list<string> insertionSort(const list<string> &xs, const string &x);
-
-inline string makeString(const list<string> &xs);
+inline stringstream insertionSort(const string &xs, const string &x);
 
 struct frontier_element {
     long priority;
     const trie_t* t;
     long char_mask;
-    const list<string>* acc;
+    const string* acc;
 
-    frontier_element(long _priority, const trie_t* _t, long _char_mask, const list<string>* _acc):
+    frontier_element(long _priority, const trie_t* _t, long _char_mask, const string* _acc):
         priority(_priority),
         t(_t),
         char_mask(_char_mask),
@@ -48,7 +46,7 @@ long complete;
 
 priority_queue<frontier_element, vector<frontier_element>, frontier_element_comparator> frontier;
 
-set<list<string> > visited;
+set<string> visited;
 
 
 void usage(const string &message = "")
@@ -133,7 +131,7 @@ int main(int argc, char* argv[])
 
     loadDictionary(unigramsfile);
 
-    const pair<set<list<string> >::iterator, bool>& solution = visited.insert(list<string>());
+    const pair<set<string>::iterator, bool> solution = visited.insert(string());
     frontier.emplace(1 << 26, &dict, 0L, &*solution.first);
 
     unsigned long timeoutAtMillis = ULONG_MAX;
@@ -165,31 +163,33 @@ string sortAndFilterChars(string s)
     return ss.str();
 }
 
-inline list<string> insertionSort(const list<string> &xs, const string &x)
+inline stringstream insertionSort(const string &xs, const string &x)
 {
-    list<string> sorted = xs;
-    for (list<string>::iterator it=sorted.begin(); it!=sorted.end(); ++it)
-    {
-        if (x < *it)
-        {
-            sorted.insert(it, x);
-            break;
-        }
-    }
-    if (xs.size() == sorted.size())
-        sorted.push_back(x);
-    return sorted;
-}
+    stringstream sorted;
+    stringstream in(xs);
+    string word;
+    bool inserted = false;
+    bool first = true;
 
-inline string makeString(const list<string> &xs)
-{
-    stringstream ss;
-    for (list<string>::const_iterator it=xs.cbegin(); it!=xs.cend(); ++it)
-        if (it == xs.cbegin())
-            ss << *it;
-        else
-            ss << ' ' << *it;
-    return ss.str();
+    while (getline(in, word, ' '))
+    {
+        if (!inserted && x < word)
+        {
+            if (!first) sorted << ' ';
+            sorted << x;
+            first = false;
+            inserted = true;
+        }
+        if (!first) sorted << ' ';
+        sorted << word;
+        first = false;
+    }
+    if (!inserted) {
+        if (!first) sorted << ' ';
+        sorted << x;
+    }
+
+    return sorted;
 }
 
 void solve(int solutionLimit, unsigned long timeoutAtMillis)
@@ -228,15 +228,14 @@ void solve(int solutionLimit, unsigned long timeoutAtMillis)
                 {
                     // we have found a dictionary word (not just a prefix)
 
-                    const pair<set<list<string> >::iterator, bool>& solution =
-                        visited.emplace(insertionSort(*f.acc, kv->first));
+                    const pair<set<string>::iterator, bool> solution =
+                        visited.emplace(insertionSort(*f.acc, kv->first).str());
 
                     if (solution.second)
                     {
                         if (eof)
                         {
-                            const string p = makeString(*solution.first);
-                            cout << p << endl;
+                            cout << *solution.first << endl;
                             solutions++;
                             if (solutions >= solutionLimit)
                                 return;
