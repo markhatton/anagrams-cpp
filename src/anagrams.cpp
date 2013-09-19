@@ -56,7 +56,7 @@ void usage(const string &message = "")
     if (!message.empty())
         cerr << message << endl;
 
-    cout
+    cerr
             << "Usage: anagrams INPUT...\n"
                 "Options:\n"
                 "  -u file                    unigrams CSV file to use as dictionary, defaults to ./unigrams\n"
