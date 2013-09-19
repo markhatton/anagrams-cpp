@@ -27,10 +27,10 @@ inline string makeString(const list<string> &xs);
 struct frontier_element {
     long priority;
     const trie_t* t;
-    long char_mask;
+    uint64_t char_mask;
     const list<string>* acc;
 
-    frontier_element(long _priority, const trie_t* _t, long _char_mask, const list<string>* _acc):
+    frontier_element(long _priority, const trie_t* _t, uint64_t _char_mask, const list<string>* _acc):
         priority(_priority),
         t(_t),
         char_mask(_char_mask),
@@ -44,7 +44,7 @@ struct frontier_element_comparator : binary_function <frontier_element,frontier_
 
 string chars;
 
-long complete;
+uint64_t complete;
 
 priority_queue<frontier_element, vector<frontier_element>, frontier_element_comparator> frontier;
 
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 {
     string input = "";
     string unigramsfile = "./unigrams";
-    unsigned long solutionsLimit = ULONG_MAX;
+    uint64_t solutionsLimit = ULONG_MAX;
     int timeoutSeconds = 0;
 
     bool no_more_opts = false;
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
     }
 
     chars = sortAndFilterChars(input);
-    complete = LONG_MAX >> (sizeof(complete) * 8 - chars.length() - 1);
+    complete = UINT64_MAX >> (64 - chars.length());
 
     if (chars.empty()) {
         usage();
@@ -219,7 +219,7 @@ void solve(int solutionLimit, unsigned long timeoutAtMillis)
     
             if (t)
             {
-                long char_mask(f.char_mask);
+                uint64_t char_mask(f.char_mask);
                 char_mask |= (1 << i);
     
                 pair<const string, long>* kv = t->getValue();
