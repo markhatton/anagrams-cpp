@@ -20,15 +20,17 @@ void solve(int solutionLimit, unsigned long timeoutAtMillis);
 
 string sortAndFilterChars(const string s);
 
-inline stringstream insertionSort(const string &xs, const string &x);
+inline list<string> insertionSort(const list<string> &xs, const string &x);
+
+inline string makeString(const list<string> &xs);
 
 struct frontier_element {
     long priority;
     const trie_t* t;
-    long char_mask;
-    const string* acc;
+    uint64_t char_mask;
+    const list<string>* acc;
 
-    frontier_element(long _priority, const trie_t* _t, long _char_mask, const string* _acc):
+    frontier_element(long _priority, const trie_t* _t, uint64_t _char_mask, const list<string>* _acc):
         priority(_priority),
         t(_t),
         char_mask(_char_mask),
@@ -42,11 +44,11 @@ struct frontier_element_comparator : binary_function <frontier_element,frontier_
 
 string chars;
 
-long complete;
+uint64_t complete;
 
 priority_queue<frontier_element, vector<frontier_element>, frontier_element_comparator> frontier;
 
-set<string> visited;
+set<list<string> > visited;
 
 
 void usage(const string &message = "")
@@ -66,7 +68,7 @@ int main(int argc, char* argv[])
 {
     string input = "";
     string unigramsfile = "./unigrams";
-    unsigned long solutionsLimit = ULONG_MAX;
+    uint64_t solutionsLimit = ULONG_MAX;
     int timeoutSeconds = 0;
 
     bool no_more_opts = false;
@@ -117,7 +119,7 @@ int main(int argc, char* argv[])
     }
 
     chars = sortAndFilterChars(input);
-    complete = LONG_MAX >> (sizeof(complete) * 8 - chars.length() - 1);
+    complete = UINT64_MAX >> (64 - chars.length());
 
     if (chars.empty()) {
         usage();
@@ -131,7 +133,7 @@ int main(int argc, char* argv[])
 
     loadDictionary(unigramsfile);
 
-    const pair<set<string>::iterator, bool> solution = visited.insert(string());
+    const pair<set<list<string> >::iterator, bool>& solution = visited.insert(list<string>());
     frontier.emplace(1 << 26, &dict, 0L, &*solution.first);
 
     unsigned long timeoutAtMillis = ULONG_MAX;
@@ -163,42 +165,43 @@ string sortAndFilterChars(string s)
     return ss.str();
 }
 
-inline stringstream insertionSort(const string &xs, const string &x)
+inline list<string> insertionSort(const list<string> &xs, const string &x)
 {
-    stringstream sorted;
-    stringstream in(xs);
-    string word;
-    bool inserted = false;
-    bool first = true;
-
-    while (getline(in, word, ' '))
+    list<string> sorted = xs;
+    for (list<string>::iterator it=sorted.begin(); it!=sorted.end(); ++it)
     {
-        if (!inserted && x < word)
+        if (x < *it)
         {
-            if (!first) sorted << ' ';
-            sorted << x;
-            first = false;
-            inserted = true;
+            sorted.insert(it, x);
+            break;
         }
-        if (!first) sorted << ' ';
-        sorted << word;
-        first = false;
     }
-    if (!inserted) {
-        if (!first) sorted << ' ';
-        sorted << x;
-    }
-
+    if (xs.size() == sorted.size())
+        sorted.push_back(x);
     return sorted;
+}
+
+inline string makeString(const list<string> &xs)
+{
+    stringstream ss;
+    for (list<string>::const_iterator it=xs.cbegin(); it!=xs.cend(); ++it)
+        if (it == xs.cbegin())
+            ss << *it;
+        else
+            ss << ' ' << *it;
+    return ss.str();
 }
 
 void solve(int solutionLimit, unsigned long timeoutAtMillis)
 {
     unsigned long solutions = 0;
+    unsigned long iterations = 0;
 
     while (true) {
 
-        if (frontier.empty() || chrono::system_clock::now().time_since_epoch() / chrono::milliseconds(1) > timeoutAtMillis)
+	iterations++;
+
+        if (frontier.empty() || (iterations % 8192 == 0 && chrono::system_clock::now().time_since_epoch() / chrono::milliseconds(1) > timeoutAtMillis))
             break;
 
         const frontier_element f = frontier.top();
@@ -216,26 +219,25 @@ void solve(int solutionLimit, unsigned long timeoutAtMillis)
     
             if (t)
             {
-                long char_mask(f.char_mask);
+                uint64_t char_mask(f.char_mask);
                 char_mask |= (1 << i);
     
-                bool eof = (char_mask & complete) == complete;
-                if (!eof)
-                    frontier.emplace(f.priority, t, char_mask, f.acc);
-
                 pair<const string, long>* kv = t->getValue();
+                bool eof = (char_mask & complete) == complete;
+
                 if (kv)
                 {
                     // we have found a dictionary word (not just a prefix)
 
-                    const pair<set<string>::iterator, bool> solution =
-                        visited.emplace(insertionSort(*f.acc, kv->first).str());
+                    const pair<set<list<string> >::iterator, bool>& solution =
+                        visited.insert(insertionSort(*f.acc, kv->first));
 
                     if (solution.second)
                     {
                         if (eof)
                         {
-                            cout << *solution.first << endl;
+                            const string p = makeString(*solution.first);
+                            cout << p << endl;
                             solutions++;
                             if (solutions >= solutionLimit)
                                 return;
@@ -246,6 +248,9 @@ void solve(int solutionLimit, unsigned long timeoutAtMillis)
                         }
                     }
                 }
+    
+                if (!eof)
+                    frontier.emplace(f.priority, t, char_mask, f.acc);
             }
     
         }
