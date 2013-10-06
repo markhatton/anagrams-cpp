@@ -59,7 +59,7 @@ void usage(const string &message = "")
                 "Options:\n"
                 "  -u file                    unigrams CSV file to use as dictionary, defaults to ./unigrams\n"
                 "  -l n                       limit number of solutions to n, defaults to unlimited (0)\n"
-                "  -t seconds                 timeout execution afer seconds, defaults to no timeout (0)\n";
+                "  -t seconds                 timeout execution after seconds, defaults to no timeout (0)\n";
 }
 
 int main(int argc, char* argv[])
