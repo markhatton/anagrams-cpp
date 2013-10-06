@@ -22,7 +22,7 @@ Anagram solver command-line utility implemented in C++
 
 Will output all anagrams of the string "Hello World" using `/usr/share/dict/words` as a dictionary.
 
-    ./anagrams -u unigrams.csv Hello World -t 10 -l 100
+    ./anagrams -u unigrams.csv -t 10 -l 100 Hello World
 
 Will output the first 100 anagrams of the input string "Hello World" and will terminate the search after 10 seconds if 100 solutions are not reached by this time.  Will use the file `unigrams.csv` to prioritise solutions that contain commonly used words, see below.
 
@@ -35,11 +35,13 @@ To this aim, `anagrams` may take as input a tab-separated CSV file containing wo
 When given such a file as input, partial solutions containing common words will be solved first, leaving partial solutions with less frequently used words to be solved later (or never solved at all).
 
 For example the first 3 solutions of the input "Mark Hatton" using unproritised searching are:
+
     am thank tor
     arm thank to
     am rot thank
 
 But given unigram frequencies as input, the first 3 solutions are:
+
     mark on that
     mark no that
     mark than to
