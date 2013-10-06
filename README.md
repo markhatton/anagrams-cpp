@@ -6,15 +6,15 @@ Anagram solver command-line utility implemented in C++
 ### Features
 
 - Prioritisation:-
--- Uses an input file containing term frequencies to prioritise processing of solutions
--- Alternatively, works just fine with a regular word list, e.g. `/usr/share/dict/words`
+  - Uses an input file containing term frequencies to prioritise processing of solutions
+  - Alternatively, works just fine with a regular word list, e.g. `/usr/share/dict/words`
 - Performance:-
--- A trie structure holds the dictionary for efficient traversals
--- A 64-bit bitmask is used to store the state of each frontier element
--- Keeps a list of visited tree nodes such that the separate subtrees of e.g.: "for now" and "now for" will only be searched once
--- Avoids unnecessary processing when input contains mutliple instances of the same letter
--- A priority queue is used to prioritise the frontier, by default solutions with fewer separate words are prioritised
--- Uses C++11 techniques to avoid memory copy operations
+  - A trie structure holds the dictionary for efficient traversals
+  - A 64-bit bitmask is used to store the state of each frontier element
+  - Keeps a list of visited tree nodes such that the separate subtrees of e.g.: "for now" and "now for" will only be searched once
+  - Avoids unnecessary processing when input contains mutliple instances of the same letter
+  - A priority queue is used to prioritise the frontier, by default solutions with fewer separate words are prioritised
+  - Uses C++11 techniques to avoid memory copy operations
 
 ### Usage
 
