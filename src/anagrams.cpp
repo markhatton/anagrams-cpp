@@ -57,7 +57,7 @@ void usage(const string &message = "")
     cerr
             << "Usage: anagrams INPUT...\n"
                 "Options:\n"
-                "  -u file                    unigrams CSV file to use as dictionary, defaults to ./unigrams\n"
+                "  -u file                    unigrams CSV or dictionary file, defaults to /usr/share/dict/words\n"
                 "  -l n                       limit number of solutions to n, defaults to unlimited (0)\n"
                 "  -t seconds                 timeout execution after seconds, defaults to no timeout (0)\n";
 }
@@ -65,7 +65,7 @@ void usage(const string &message = "")
 int main(int argc, char* argv[])
 {
     string input = "";
-    string unigramsfile = "./unigrams";
+    string unigramsfile = "/usr/share/dict/words";
     unsigned long solutionsLimit = ULONG_MAX;
     int timeoutSeconds = 0;
 
