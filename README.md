@@ -16,6 +16,10 @@ Anagram solver command-line utility implemented in C++
   - A priority queue is used to prioritise the frontier, by default solutions with fewer separate words are prioritised
   - Uses C++11 techniques to avoid copies
 
+### Try it!
+
+Try it out at: http://betteranagrams.com
+
 ### Usage
 
     ./anagrams Hello World
